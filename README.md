@@ -8,9 +8,19 @@
   - [Service Orchestration](#service-orchestration)
   - [Library Organization](#library-organization)
   - [Testing Types Overview](#testing-types-overview)
-  - [EAB Testing Architecture](#eab-testing-architecture)
+  - [SAB Testing Architecture](#sab-testing-architecture)
 - [Design Patterns](#design-patterns)
   - [AAA (Arrange-Act-Assert) Pattern](#aaa-arrange-act-assert-pattern)
+    - [Core Architecture](#core-architecture)
+    - [AAA Pattern Organization](#aaa-pattern-organization)
+    - [API Assistant Implementation](#api-assistant-implementation)
+    - [SAB Assistant Implementation](#sab-assistant-implementation)
+    - [Assistant Mapper Pattern](#assistant-mapper-pattern)
+    - [TestUser Integration](#testuser-integration)
+  - [Structural Design Patterns](#structural-design-patterns)
+    - [Mixin Pattern (SAB Domain)](#mixin-pattern-sab-domain)
+    - [Facade Pattern (Assistant Factory)](#facade-pattern-assistant-factory)
+    - [Mapper Pattern (Configuration Management)](#mapper-pattern-configuration-management)
   - [Builder Pattern](#builder-pattern)
   - [Factory Pattern](#factory-pattern)
   - [Facade Pattern](#facade-pattern)
@@ -27,19 +37,19 @@
   - [AAA Pattern Flow](#aaa-pattern-flow)
   - [Library Dependency Graph](#library-dependency-graph)
   - [CI/CD Pipeline](#cicd-pipeline)
-  - [EAB Test Sharding Flow](#eab-test-sharding-flow)
+  - [SAB Test Sharding Flow](#sab-test-sharding-flow)
 - [Code Samples](#code-samples)
   - [TestUser Creation and Management](#testuser-creation-and-management)
   - [AAA Assistant Usage](#aaa-assistant-usage)
   - [Builder Pattern Examples](#builder-pattern-examples)
   - [Configuration Management](#configuration-management)
-  - [EAB Testing Examples](#eab-testing-examples)
+  - [SAB Testing Examples](#sab-testing-examples)
 - [Complete Flows](#complete-flows)
   - [Test Execution Flow](#test-execution-flow)
   - [Test User Acquisition and Lifecycle](#test-user-acquisition-and-lifecycle)
   - [Configuration Loading and Override](#configuration-loading-and-override)
   - [Report Portal Integration](#report-portal-integration)
-  - [EAB Test Execution Flow](#eab-test-execution-flow)
+  - [SAB Test Execution Flow](#sab-test-execution-flow)
 - [CI/CD Integration](#cicd-integration)
 - [References](#references)
 
@@ -47,11 +57,11 @@
 
 ## Overview
 
-This document provides a comprehensive overview of a sophisticated test automation framework built using a monorepo architecture. The framework orchestrates multiple testing services (API, Web Portal, EAB, Performance) while maintaining code reusability, consistency, and scalability through well-defined design patterns and architectural principles.
+This document provides a comprehensive overview of a sophisticated test automation framework built using a monorepo architecture. The framework orchestrates multiple testing services (API, Web Portal, SAB, Performance) while maintaining code reusability, consistency, and scalability through well-defined design patterns and architectural principles.
 
 ### Key Objectives
 
-- **Unified Testing Infrastructure**: Integrate different testing types (API, UI, EAB, Performance) in a single repository
+- **Unified Testing Infrastructure**: Integrate different testing types (API, UI, SAB, Performance) in a single repository
 - **Code Reusability**: Share common utilities, types, and test assistants across different testing domains
 - **Maintainability**: Organize code by domain and feature to minimize coupling and maximize cohesion
 - **Scalability**: Support parallel test execution, dynamic test user management, and flexible configuration
@@ -70,11 +80,11 @@ The project uses **Nx** (Nrwl Extensions) as the monorepo management tool, enabl
 - **Library Management**: Automated refactoring for library creation, renaming, moving, and removal
 
 ```
-automation-test/
+automation-framework/
 ├── apps/                    # Test applications organized by testing type
 │   ├── api/                 # API testing application
 │   ├── web-portal/          # Web Portal UI testing application
-│   ├── eab/                 # Enterprise Access Browser testing application
+│   ├── sab/                 # Secure Access Browser testing application
 │   ├── performance/         # Performance testing application
 │   ├── new-tenant/          # New tenant setup testing application
 │   └── playwright.base.config.ts  # Base Playwright configuration
@@ -83,9 +93,9 @@ automation-test/
 │   │   ├── type-api/        # API type definitions
 │   │   ├── type-api-core/  # Core API types
 │   │   └── util-api/       # API utility functions and builders
-│   ├── eab/                 # EAB-specific libraries
-│   │   ├── type-eab/        # EAB type definitions
-│   │   └── util-eab/       # EAB utility functions
+│   ├── sab/                 # SAB-specific libraries
+│   │   ├── type-sab/        # SAB type definitions
+│   │   └── util-sab/       # SAB utility functions
 │   ├── web-portal/          # Web Portal-specific libraries
 │   │   ├── type-web-portal/ # Web Portal type definitions
 │   │   └── util-web-portal/ # Web Portal utility functions
@@ -142,7 +152,7 @@ Libraries are organized by **domain** and **concern**:
 #### Domain-Specific Libraries
 
 - **`libs/api/`**: API testing utilities, types, and builders
-- **`libs/eab/`**: Enterprise Access Browser testing utilities
+- **`libs/sab/`**: Secure Access Browser testing utilities
 - **`libs/web-portal/`**: Web Portal UI testing utilities
 
 #### Shared Libraries
@@ -158,19 +168,19 @@ Libraries are organized by **domain** and **concern**:
 |-------------|----------|-------------|
 | **API Testing** | `apps/api/` | GraphQL and RESTful API endpoint testing |
 | **Web Portal Testing** | `apps/web-portal/` | End-to-end web application UI testing |
-| **EAB Testing** | `apps/eab/` | Enterprise Access Browser automation testing |
+| **SAB Testing** | `apps/sab/` | Secure Access Browser automation testing |
 | **Performance Testing** | `apps/performance/` | Performance and load testing |
 | **New Tenant Testing** | `apps/new-tenant/` | Tenant setup and configuration testing |
 
-### EAB Testing Architecture
+### SAB Testing Architecture
 
-EAB (Enterprise Access Browser) testing has a unique architecture that combines multiple components to automate native desktop application testing.
+SAB (Secure Access Browser) testing has a unique architecture that combines multiple components to automate native desktop application testing.
 
-#### EAB Component Architecture
+#### SAB Component Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                  EAB Test Architecture                   │
+│                  SAB Test Architecture                   │
 ├─────────────────────────────────────────────────────────┤
 │                                                          │
 │  ┌──────────────────────────────────────┐               │
@@ -182,13 +192,13 @@ EAB (Enterprise Access Browser) testing has a unique architecture that combines 
 │  ┌──────────────────────────────────────┐               │
 │  │      TestUser                         │               │
 │  │  - useUnityAssistant()                │               │
-│  │  - useMammothBrowserAssistant()       │               │
+│  │  - useCorporateBrowserAssistant()       │               │
 │  └──────┬─────────────────┬──────────────┘               │
 │         │                 │                              │
 │         │                 │                              │
 │         ▼                 ▼                              │
 │  ┌──────────────┐  ┌─────────────────────┐            │
-│  │ Unity Assistant│  │ Mammoth Browser      │            │
+│  │ Unity Assistant│  │ Corporate Browser      │            │
 │  │                │  │ Assistant           │            │
 │  │ Unity Tray UI  │  │                     │            │
 │  │ Operations     │  │ Browser Automation  │            │
@@ -197,7 +207,7 @@ EAB (Enterprise Access Browser) testing has a unique architecture that combines 
 │         │                      │                        │
 │         ▼                      ▼                        │
 │  ┌──────────────┐  ┌─────────────────────┐            │
-│  │PlatformDriver│  │MammothBrowserDriver  │            │
+│  │PlatformDriver│  │CorporateBrowserDriver  │            │
 │  │              │  │                      │            │
 │  │ Windows:     │  │ CDP (Chrome DevTools │            │
 │  │ WinAppDriver │  │ Protocol) Connection │            │
@@ -210,8 +220,8 @@ EAB (Enterprise Access Browser) testing has a unique architecture that combines 
 │                    │                                    │
 │                    ▼                                    │
 │         ┌─────────────────────┐                         │
-│         │  EAB Application    │                         │
-│         │  (Mammoth Browser)  │                         │
+│         │  SAB Application    │                         │
+│         │  (Corporate Browser)  │                         │
 │         │                     │                         │
 │         │  - Unity Tray       │                         │
 │         │  - Browser Engine   │                         │
@@ -220,6 +230,32 @@ EAB (Enterprise Access Browser) testing has a unique architecture that combines 
 │                                                          │
 └─────────────────────────────────────────────────────────┘
 ```
+
+#### Test User Management and Parallel Execution
+
+The framework implements a sophisticated test user management system that supports parallel execution across multiple Playwright workers. The architecture includes:
+
+**Test User Generation Layer**
+- **`TestUserGenerator`**: Factory component responsible for creating diverse user personas (Admin User, Random User, Anonymous User, Managed User)
+- **Behavior**: Users are either dynamically generated or reused from existing pools to facilitate interaction with the system under test
+
+**Test User Management Layer**
+- **`TestUserManager`**: Central orchestrator that manages user allocation and state
+- **Functionality**: Receives generated users from `TestUserGenerator` and dispatches them into active test scenarios
+- **Distribution**: Users are allocated to parallel execution workers via `UserIntoPlay` mechanism
+
+**Parallel Execution Workers**
+- The system leverages Playwright's parallel execution capabilities with multiple worker instances
+- Each worker operates with a unique Parallel Index and receives a distinct subset of user entities
+- **User Distribution**: Specific users are assigned to specific workers to prevent state collision
+- **Test Assistants (TA)**: Within each worker, domain-specific assistants (e.g., `UserAPI TA`, `PolicyAPI TA`, `EmailDomainAPI TA`) encapsulate logic for specific API domains
+- **AAA Pattern Implementation**: Each assistant structures test logic following the Arrange-Act-Assert pattern:
+  - **Helper**: Utility functions or setup
+  - **Arrange**: Test setup and preconditions
+  - **Actions**: The actual operations or interactions being tested
+  - **Assert**: Verification of expected outcomes
+
+This design promotes efficient test execution, reusability of test data, and clear structuring of test logic while ensuring thread-safe user state management across parallel test execution environments.
 
 #### Key Components
 
@@ -234,8 +270,8 @@ EAB (Enterprise Access Browser) testing has a unique architecture that combines 
   - Execute system-level actions (keyboard shortcuts, window management)
   - Access desktop elements
 
-**2. MammothBrowserDriver (Browser Automation)**
-- **Purpose**: Controls the Mammoth Browser application via Chrome DevTools Protocol (CDP)
+**2. CorporateBrowserDriver (Browser Automation)**
+- **Purpose**: Controls the Corporate Browser application via Chrome DevTools Protocol (CDP)
 - **Connection Method**: CDP over WebSocket to `--remote-debugging-port`
 - **Responsibilities**:
   - Initialize browser context
@@ -249,36 +285,36 @@ EAB (Enterprise Access Browser) testing has a unique architecture that combines 
 - **Components**: Arrange, Actions, Assert classes for Unity Tray interactions
 - **Usage**: `testUser.useUnityAssistant()`
 
-**4. MammothBrowserAssistant**
+**4. CorporateBrowserAssistant**
 - **Purpose**: Provides AAA pattern interface for browser operations
 - **Components**: Arrange, Actions, Assert classes for browser interactions
-- **Usage**: `testUser.useMammothBrowserAssistant()`
+- **Usage**: `testUser.useCorporateBrowserAssistant()`
 
-#### EAB Test Structure Organization
+#### SAB Test Structure Organization
 
-EAB tests are organized by feature categories in a hierarchical structure:
+SAB tests are organized by feature categories in a hierarchical structure:
 
 ```
-apps/eab/tests/
+apps/sab/tests/
 ├── 01-install/                    # Installation tests
 │   ├── 01-010-001-install.win.msi.spec.ts
 │   ├── 01-010-002-install.win.msix.spec.ts
 │   └── 01-010-003-install.mac.spec.ts
 ├── 02-features/                   # Feature tests
-│   ├── mammothBrowser/
+│   ├── enterpriseBrowser/
 │   │   ├── 010-login/            # Login feature tests
-│   │   │   ├── 02-010-001-mammoth.login.spec.ts
-│   │   │   └── 02-010-002-mammoth.login.loginPolicy.spec.ts
+│   │   │   ├── 02-010-001-enterprise.login.spec.ts
+│   │   │   └── 02-010-002-enterprise.login.loginPolicy.spec.ts
 │   │   ├── 020-webDefault/       # Web default tests
-│   │   │   ├── 02-020-001-mammoth.saas.spec.ts
-│   │   │   ├── 02-020-002-mammoth.contentScanning.spec.ts
+│   │   │   ├── 02-020-001-enterprise.saas.spec.ts
+│   │   │   ├── 02-020-002-enterprise.contentScanning.spec.ts
 │   │   │   └── src/               # Shared test utilities
 │   │   ├── 030-app/               # App launch tests
-│   │   │   ├── 02-030-001-mammoth.app.rdp.spec.ts
-│   │   │   ├── 02-030-002-mammoth.app.ssh.spec.ts
-│   │   │   └── 02-030-003-mammoth.app.fileShare.spec.ts
+│   │   │   ├── 02-030-001-enterprise.app.rdp.spec.ts
+│   │   │   ├── 02-030-002-enterprise.app.ssh.spec.ts
+│   │   │   └── 02-030-003-enterprise.app.fileShare.spec.ts
 │   │   └── 090-quit/              # Quit/cleanup tests
-│   │       └── 02-090-001-mammoth.quit.spec.ts
+│   │       └── 02-090-001-enterprise.quit.spec.ts
 │   └── unity/                     # Unity-specific tests
 │       ├── 02-01-unity.login.spec.ts
 │       └── 02-02-unity.quit.spec.ts
@@ -291,13 +327,13 @@ apps/eab/tests/
 
 #### Test Naming Convention
 
-EAB tests follow a structured naming pattern:
+SAB tests follow a structured naming pattern:
 - **Format**: `{category}-{subcategory}-{sequence}-{feature}.spec.ts`
-- **Example**: `02-010-001-mammoth.login.spec.ts`
+- **Example**: `02-010-001-enterprise.login.spec.ts`
   - `02`: Feature category (02 = features)
   - `010`: Subcategory (010 = login)
   - `001`: Sequence number
-  - `mammoth.login`: Feature description
+  - `enterprise.login`: Feature description
 
 ---
 
@@ -305,7 +341,37 @@ EAB tests follow a structured naming pattern:
 
 ### AAA (Arrange-Act-Assert) Pattern
 
-The framework implements a structured AAA pattern where each test assistant provides three distinct interfaces:
+The framework implements a structured AAA pattern where each test assistant provides three distinct interfaces. The pattern is consistently applied across API testing, SAB (Secure Access Browser) testing, and Web Portal testing domains.
+
+#### Core Architecture
+
+The AAA pattern is built upon a foundation of several key components:
+
+**1. TestAAA Base Class**
+- **Location**: `libs/shared/feature-aaa/src/lib/aaa/feature-test-aaa.ts`
+- **Purpose**: Base class that all Arrange, Actions, and Assert classes extend
+- **Responsibilities**:
+  - Provides access to API service instances
+  - Manages utility managers (faker, logger, mapper, etc.)
+  - Validates API service context for arrange steps
+  - Offers builder managers for API and E2E operations
+
+**2. Step Decorator**
+- **Location**: `libs/shared/feature-aaa/src/lib/aaa/test-step-decorator.ts`
+- **Purpose**: Automatically tracks test execution steps with context-aware logging
+- **Behavior**:
+  - Uses Playwright `test.step()` in test contexts
+  - Falls back to direct logging in global setup/teardown
+  - Supports custom step descriptions
+  - Integrates with execution tracker for reporting
+
+**3. Assistant Facade Pattern**
+- **Purpose**: Provides a unified interface to Arrange, Actions, and Assert components
+- **Structure**: Each assistant exposes four properties:
+  - `arrange`: Setup and data preparation methods
+  - `actions`: Operation execution methods
+  - `assert`: Validation and assertion methods
+  - `helper`: Alias to arrange for convenience
 
 #### Pattern Structure
 
@@ -317,6 +383,50 @@ type TALoginPolicyAPI = {
   assert: LoginPolicyAPIAssert;      // Result validation
   helper: LoginPolicyAPIArrange;    // Helper methods (same as arrange)
 };
+```
+
+#### AAA Pattern Organization
+
+The AAA pattern is organized into domain-specific implementations:
+
+**API Domain Structure:**
+```
+libs/shared/feature-aaa/src/lib/api/
+├── gql/                          # GraphQL API assistants
+│   ├── assistants/
+│   │   ├── login-policy/
+│   │   │   ├── login-policy-actions.ts
+│   │   │   ├── login-policy-arrange.ts
+│   │   │   ├── login-policy-assert.ts
+│   │   │   └── login-policy-facade.ts
+│   │   └── [other-assistants]/
+│   └── managers/                 # API client managers
+├── restful/                      # RESTful API assistants
+│   ├── assistants/
+│   └── managers/
+└── config-aaa-assistant-mapper.ts  # Mapper configuration
+```
+
+**SAB Domain Structure:**
+```
+libs/shared/feature-aaa/src/lib/sab/
+├── corporate-browser/              # Corporate Browser assistants
+│   ├── assistant/
+│   │   ├── appLauncherPage/
+│   │   │   ├── mb-appLauncherPage-actions.ts
+│   │   │   ├── mb-appLauncherPage-arrange.ts
+│   │   │   ├── mb-appLauncherPage-assert.ts
+│   │   │   └── mb-appLauncherPage-facade.ts
+│   │   └── [other-pages]/
+│   ├── components/              # Shared mixin components
+│   │   ├── basePageActions.ts   # Actions mixin
+│   │   ├── basePageArrange.ts   # Arrange mixin
+│   │   ├── basePageAssert.ts    # Assert mixin
+│   │   └── basePage.ts          # Base page class
+│   └── config-aaa-assistant-mapper.ts
+└── platform-driver/              # Platform driver assistants
+    ├── assistant/
+    └── config-aaa-assistant-mapper.ts
 ```
 
 #### Arrange Phase
@@ -413,6 +523,380 @@ export class LoginPolicyAPIAssert {
   }
 }
 ```
+
+### API Assistant Implementation
+
+API assistants follow a consistent structure for both GraphQL and RESTful APIs.
+
+#### API Assistant Structure
+
+**1. Manager Layer (API Client)**
+- **Purpose**: Encapsulates API client logic (GraphQL or RESTful)
+- **Location**: `libs/shared/feature-aaa/src/lib/api/gql/managers/` or `restful/managers/`
+- **Responsibilities**:
+  - Manages HTTP connections
+  - Handles authentication
+  - Executes API requests
+  - Returns typed responses
+
+**2. Assistant Layer (AAA Implementation)**
+- **Purpose**: Implements the AAA pattern for specific API endpoints
+- **Location**: `libs/shared/feature-aaa/src/lib/api/gql/assistants/{service-name}/`
+- **File Structure**:
+  - `{service-name}-actions.ts`: CRUD operations
+  - `{service-name}-arrange.ts`: Data preparation and builders
+  - `{service-name}-assert.ts`: Validation logic
+  - `{service-name}-facade.ts`: Assistant factory function
+
+**3. Mapper Configuration**
+- **Purpose**: Maps API manager types to their corresponding assistant factory functions
+- **Location**: `libs/shared/feature-aaa/src/lib/api/config-aaa-assistant-mapper.ts`
+- **Functionality**:
+  - Associates API client constructors with assistant factories
+  - Configures endpoint URLs (GraphQL and RESTful)
+  - Enables dynamic assistant instantiation
+
+#### API Assistant Usage Pattern
+
+```typescript
+// 1. TestUser acquires API assistant via useAPIAssistant
+const adminUserAPITA = await adminUser.useAPIAssistant<
+  LoginPolicyAPI,
+  TALoginPolicyAPI
+>(LoginPolicyAPI);
+
+// 2. Arrange: Prepare test data
+const createInput = await adminUserAPITA.arrange.getCreateInputPayload({
+  isDenyAction: false,
+});
+
+// 3. Actions: Execute API operation
+const actualResult = await adminUserAPITA.actions.createLoginPolicy(createInput);
+
+// 4. Assert: Validate results
+const expectedResult = await adminUserAPITA.arrange.getExpectedResultForCreatePolicyOK(createInput);
+await adminUserAPITA.assert.loginPolicyCreatedOK(actualResult, expectedResult);
+```
+
+#### API Assistant Naming Conventions
+
+**Arrange Methods:**
+- `getCreate{ServiceName}InputPayload()`: Generate create input payloads
+- `getUpdate{ServiceName}InputPayload()`: Generate update input payloads
+- `generatePreset{ServiceName}Entry()`: Create prerequisite test data
+- `getExpectedResultFor{Description}()`: Construct expected responses
+
+**Actions Methods:**
+- `create{ServiceName}()`: Create resource
+- `update{ServiceName}()`: Update resource
+- `get{ServiceName}()`: Retrieve resource
+- `list{ServiceName}()`: List resources
+- `delete{ServiceName}()`: Delete resource
+
+**Assert Methods:**
+- `{serviceName}CreatedOK()`: Validate successful creation
+- `{serviceName}UpdatedOK()`: Validate successful update
+- `{serviceName}GotOK()`: Validate successful retrieval
+- `{serviceName}GotNull()`: Validate resource not found
+- `{serviceName}ListedOK()`: Validate successful listing
+
+### SAB Assistant Implementation
+
+SAB assistants utilize a **Mixin Pattern** to share common functionality across multiple page assistants while maintaining domain-specific implementations.
+
+#### Mixin Pattern Architecture
+
+The Mixin pattern allows composition of classes from multiple base classes, enabling code reuse without multiple inheritance limitations.
+
+**Base Mixin Components:**
+- **Location**: `libs/shared/feature-aaa/src/lib/sab/corporate-browser/components/`
+- **Components**:
+  - `basePageActions.ts`: `CBPageActionsMixin` - Common browser actions
+  - `basePageArrange.ts`: `CBPageArrangeMixin` - Common setup operations
+  - `basePageAssert.ts`: `CBPageAssertMixin` - Common assertions
+
+**Mixin Implementation Pattern:**
+
+```typescript
+// Base class for the assistant
+class BaseClassCBAppLauncherPage extends TestAAA<CBAppLauncherPage> {}
+
+// Apply mixin to extend base class with shared functionality
+export class CBAppLauncherPageActions extends CBPageActionsMixin<
+  CBAppLauncherPage,
+  TConstructorArgs<BaseClassCBAppLauncherPage>
+>(BaseClassCBAppLauncherPage) {
+  // Page-specific actions that extend mixin functionality
+  @Step()
+  async openApp(options: TSabAppCategory) {
+    // Implementation specific to app launcher page
+  }
+}
+```
+
+#### SAB Assistant Structure
+
+**1. Page Object Manager**
+- **Purpose**: Encapsulates page element definitions and structure
+- **Location**: `libs/shared/feature-aaa/src/lib/sab/corporate-browser/pageObjectManager/`
+- **Responsibilities**:
+  - Defines page element locators
+  - Provides element access patterns
+  - Manages page state
+
+**2. Assistant Layer (AAA Implementation)**
+- **Purpose**: Implements AAA pattern for specific browser pages
+- **Location**: `libs/shared/feature-aaa/src/lib/sab/corporate-browser/assistant/{pageName}/`
+- **File Structure**:
+  - `cb-{pageName}-actions.ts`: Extends `CBPageActionsMixin`
+  - `cb-{pageName}-arrange.ts`: Extends `CBPageArrangeMixin`
+  - `cb-{pageName}-assert.ts`: Extends `CBPageAssertMixin`
+  - `cb-{pageName}-facade.ts`: Assistant factory function
+
+**3. Mapper Configuration**
+- **Purpose**: Maps page object manager types to assistant factories
+- **Location**: `libs/shared/feature-aaa/src/lib/sab/corporate-browser/config-aaa-assistant-mapper.ts`
+- **Additional Configuration**:
+  - `locatorStrategies`: Element location strategies
+  - `uiActions`: UI interaction utilities
+  - `pageTitles`: Page title validation
+  - `safeChecker`: Optional page readiness validation
+
+#### SAB Assistant Usage Pattern
+
+```typescript
+// 1. TestUser acquires Corporate Browser assistant
+const cbTA = await adminUser.useCorporateBrowserAssistant<
+  CBAppLauncherPage,
+  TACBAppLauncherPage
+>(CBAppLauncherPage);
+
+// 2. Arrange: Setup test environment
+await cbTA.arrange.initializeDebuggerSession();
+
+// 3. Actions: Perform browser operations
+await cbTA.actions.openApp({ category: 'web', appName: 'example-app' });
+
+// 4. Assert: Validate browser state
+await cbTA.assert.appLaunchedOK('example-app');
+```
+
+#### Mixin Benefits
+
+**Code Reusability:**
+- Common browser operations (navigation, keyboard shortcuts, clipboard operations) are defined once in mixins
+- Page-specific assistants inherit shared functionality automatically
+- Reduces code duplication across multiple page assistants
+
+**Maintainability:**
+- Changes to common functionality are made in one place (mixin)
+- All page assistants automatically benefit from mixin updates
+- Clear separation between shared and page-specific logic
+
+**Extensibility:**
+- New page assistants can easily extend mixins
+- Page-specific methods can override or extend mixin methods
+- Mixin methods are prefixed with `mx` to indicate mixin origin
+
+### Assistant Mapper Pattern
+
+The framework uses a **Mapper Pattern** to dynamically associate API clients and page objects with their corresponding AAA assistants.
+
+#### Mapper Architecture
+
+**API Assistant Mapper:**
+- **Location**: `libs/shared/feature-aaa/src/lib/api/config-aaa-assistant-mapper.ts`
+- **Structure**: `Map<Constructor, MapperData>`
+- **MapperData Properties**:
+  - `gqlEndpoint`: GraphQL endpoint URL (optional)
+  - `restHost`: RESTful API host URL (optional)
+  - `restApiPath`: RESTful API path (optional)
+  - `getTACallBackFunction`: Factory function that creates the assistant
+
+**SAB Assistant Mapper:**
+- **Location**: `libs/shared/feature-aaa/src/lib/sab/corporate-browser/config-aaa-assistant-mapper.ts`
+- **Structure**: `Map<Constructor, TMapperData>`
+- **TMapperData Properties**:
+  - `getTACallBackFunction`: Factory function
+  - `locatorStrategies`: Element location strategies
+  - `uiActions`: UI interaction utilities
+  - `pageTitles`: Page title validation array (optional)
+  - `safeChecker`: Page readiness validation function (optional)
+
+#### Mapper Registration
+
+```typescript
+// API Mapper Registration Example
+mapper.set(LoginPolicyAPI, {
+  gqlEndpoint: utilManager.processNode().facade().getter().getGraphQLEndpoint(),
+  getTACallBackFunction: getLoginPolicyAPIAssistant,
+});
+
+// SAB Mapper Registration Example
+mapper.set(CBAppLauncherPage, {
+  getTACallBackFunction: getCBAppLauncherPageAssistant,
+  locatorStrategies,
+  uiActions: actions,
+  pageTitles: [
+    TEnumValuesPageTitleChecker.AppLauncherPage,
+    TEnumValuesPageTitleChecker.InstallerPage,
+  ],
+});
+```
+
+#### Mapper Benefits
+
+**Type Safety:**
+- TypeScript ensures correct association between clients and assistants
+- Compile-time validation of mapper entries
+- Prevents runtime errors from missing mappings
+
+**Dynamic Resolution:**
+- Assistants are resolved at runtime based on client type
+- Enables flexible test execution patterns
+- Supports multiple assistant implementations for the same client
+
+**Centralized Configuration:**
+- Single source of truth for assistant mappings
+- Easy to add new assistants
+- Clear documentation of available assistants
+
+### TestUser Integration
+
+The `TestUser` class serves as the central interface for acquiring and using AAA assistants across all testing domains.
+
+#### Assistant Acquisition Methods
+
+**1. useAPIAssistant**
+- **Purpose**: Acquires API assistants for GraphQL or RESTful APIs
+- **Signature**: `useAPIAssistant<T, TAAA>(t: TApi<T>, uriOptions?: TUriOptions): Promise<TAAA>`
+- **Behavior**:
+  - Checks mapper for assistant factory function
+  - Creates API client instance with connection options
+  - Instantiates assistant via factory function
+  - Caches assistant in TestUser notes for reuse
+  - Handles authentication automatically
+
+**2. useCorporateBrowserAssistant**
+- **Purpose**: Acquires Corporate Browser page assistants
+- **Signature**: `useCorporateBrowserAssistant<T, TAAA>(t: TCorporateBrowser<T>, options?: TACorporateBrowserOptions): Promise<TAAA>`
+- **Behavior**:
+  - Resolves page object manager from mapper
+  - Initializes Corporate Browser driver connection
+  - Creates page instance with locator strategies and UI actions
+  - Validates page readiness using safe checker (if configured)
+  - Caches assistant for reuse
+
+**3. usePlatformDriverAssistant**
+- **Purpose**: Acquires Unity Tray platform driver assistants
+- **Signature**: `usePlatformDriverAssistant<T, TAAA>(t: TUserPlatformDriver<T>): Promise<TAAA>`
+- **Behavior**:
+  - Retrieves platform driver from system controller
+  - Creates platform-specific page object manager
+  - Instantiates assistant with driver and test user context
+  - Caches assistant for reuse
+
+#### Assistant Caching Mechanism
+
+Assistants are cached in `TestUser.notes` using a map key derived from:
+- Constructor type
+- Connection options (for API assistants)
+- Page options (for UI assistants)
+
+This caching ensures:
+- **Performance**: Assistants are created once and reused
+- **State Management**: Assistant state persists across test steps
+- **Resource Efficiency**: Reduces redundant object creation
+
+#### Execution Context Detection
+
+The framework automatically detects execution context (test vs utility) through:
+- **TestUser.getExecutionContext()**: Returns current execution context
+- **Step Decorator**: Uses context to determine logging strategy
+- **Execution Tracker**: Records steps with appropriate context markers
+
+This enables:
+- Proper step tracking in Playwright test reports
+- Appropriate logging in global setup/teardown
+- Context-aware error handling
+
+### Structural Design Patterns
+
+The AAA pattern implementation leverages several structural design patterns to achieve code organization, reusability, and maintainability.
+
+#### Mixin Pattern (SAB Domain)
+
+The **Mixin Pattern** is extensively used in SAB assistants to share common functionality across multiple page assistants.
+
+**Implementation Approach:**
+- Mixin functions accept a base class constructor and return an extended class
+- Multiple mixins can be composed to build complex class hierarchies
+- Page-specific assistants extend mixin-enhanced base classes
+
+**Benefits:**
+- **Code Reusability**: Common browser operations defined once
+- **Type Safety**: TypeScript ensures proper mixin composition
+- **Flexibility**: Page assistants can override or extend mixin methods
+- **Maintainability**: Changes to common functionality propagate automatically
+
+**Example Mixin Structure:**
+```typescript
+// Mixin function definition
+export function CBPageActionsMixin<
+  TPage extends BasePage<unknown>,
+  TBase extends TConstructorArgs<TestAAA<TPage>>,
+>(BaseActions: TBase) {
+  return class extends BaseActions {
+    // Shared methods available to all page assistants
+    async mxNavigateToUrl(url: string) { /* ... */ }
+    async mxPerformKeyboardShortcut(key: string) { /* ... */ }
+    // ... more shared methods
+  };
+}
+
+// Usage in page assistant
+class BaseClass extends TestAAA<CBAppLauncherPage> {}
+export class CBAppLauncherPageActions extends CBPageActionsMixin<
+  CBAppLauncherPage,
+  TConstructorArgs<BaseClass>
+>(BaseClass) {
+  // Page-specific methods
+  async openApp(options: TSabAppCategory) { /* ... */ }
+}
+```
+
+#### Facade Pattern (Assistant Factory)
+
+The **Facade Pattern** is used to provide a simplified interface to the AAA assistant components.
+
+**Implementation:**
+- Each assistant has a facade file that exports:
+  - Type definition for the assistant interface
+  - Factory function that creates and returns the assistant
+- The factory function instantiates Arrange, Actions, and Assert classes
+- Returns a unified interface with `arrange`, `actions`, `assert`, and `helper` properties
+
+**Benefits:**
+- **Simplified Interface**: Single entry point for assistant creation
+- **Consistency**: Uniform assistant structure across all domains
+- **Type Safety**: TypeScript ensures correct assistant composition
+- **Encapsulation**: Hides internal assistant construction details
+
+#### Mapper Pattern (Configuration Management)
+
+The **Mapper Pattern** provides dynamic resolution of assistants based on client types.
+
+**Implementation:**
+- Map data structure associates constructors with configuration data
+- Configuration includes factory functions, endpoints, and domain-specific settings
+- Lazy initialization: Maps are populated on first access
+- Type-safe lookups ensure correct assistant resolution
+
+**Benefits:**
+- **Dynamic Resolution**: Assistants resolved at runtime
+- **Centralized Configuration**: Single source of truth for mappings
+- **Extensibility**: Easy to add new assistants
+- **Type Safety**: Compile-time validation of mappings
 
 ### Builder Pattern
 
@@ -524,9 +1008,9 @@ const adminUser = await TestUserGenerator.createAdminUser();
 const randomUser = await TestUserGenerator.createRandomUser();
 ```
 
-### Facade Pattern
+### Facade Pattern (Utility Manager)
 
-The Facade pattern is implemented through `utilManager`, providing a unified interface to various utilities:
+The Facade pattern is implemented through `utilManager`, providing a unified interface to various utility functions across the framework:
 
 ```typescript
 // Example: Utility Manager Facade
@@ -609,7 +1093,7 @@ export class TestAccountRepository {
 }
 ```
 
-#### EAB Domain
+#### SAB Domain
 ```json
 {
   "appium": "^2.17.1",
@@ -639,11 +1123,11 @@ TypeScript path mappings enable type-safe imports across the monorepo:
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@company-qa/api/type-api": ["libs/api/type-api/src/index.ts"],
-      "@company-qa/api/util-api": ["libs/api/util-api/src/index.ts"],
-      "@company-qa/shared/feature-aaa": ["libs/shared/feature-aaa/src/index.ts"],
-      "@company-qa/shared/util-core": ["libs/shared/util-core/src/index.ts"],
-      "@company-qa/web-portal/type-web-portal": ["libs/web-portal/type-web-portal/src/index.ts"]
+      "@framework/api/type-api": ["libs/api/type-api/src/index.ts"],
+      "@framework/api/util-api": ["libs/api/util-api/src/index.ts"],
+      "@framework/shared/feature-aaa": ["libs/shared/feature-aaa/src/index.ts"],
+      "@framework/shared/util-core": ["libs/shared/util-core/src/index.ts"],
+      "@framework/web-portal/type-web-portal": ["libs/web-portal/type-web-portal/src/index.ts"]
     }
   }
 }
@@ -665,7 +1149,7 @@ The following diagram illustrates the relationships between TestUser, TestUserMa
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   automation-test                           │
+│                   automation-framework                      │
 │                     (Nx Monorepo)                           │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
@@ -682,12 +1166,12 @@ The following diagram illustrates the relationships between TestUser, TestUserMa
 │  │  ┌──────────────┐ │    │  ┌──────────────┐ │             │
 │  │  │  web-portal/ │ │    │  │  eab/        │ │             │
 │  │  │              │ │    │  │              │ │             │
-│  │  │  tests/      │ │    │  │  type-eab/   │ │             │
-│  │  │  config/     │ │    │  │  util-eab/   │ │             │
+│  │  │  tests/      │ │    │  │  type-sab/   │ │             │
+│  │  │  config/     │ │    │  │  util-sab/   │ │             │
 │  │  └──────────────┘ │    │  └──────────────┘ │             │
 │  │                    │    │                    │             │
 │  │  ┌──────────────┐ │    │  ┌──────────────┐ │             │
-│  │  │  eab/        │ │    │  │  shared/     │ │             │
+│  │  │  sab/        │ │    │  │  shared/     │ │             │
 │  │  │              │ │    │  │              │ │             │
 │  │  │  tests/      │ │    │  │  feature-aaa  │ │             │
 │  │  │  config/     │ │    │  │  util-core   │ │             │
@@ -856,7 +1340,7 @@ The following diagram illustrates the relationships between TestUser, TestUserMa
 │                      Apps Layer                         │
 │                                                          │
 │  ┌─────────┐  ┌────────────┐  ┌──────┐  ┌────────────┐ │
-│  │  api/   │  │ web-portal/│  │ eab/ │  │performance/│ │
+│  │  api/   │  │ web-portal/│  │ sab/ │  │performance/│ │
 │  └────┬────┘  └──────┬──────┘  └───┬──┘  └──────┬─────┘ │
 └───────┼──────────────┼──────────────┼─────────────┼──────┘
         │              │              │             │
@@ -865,10 +1349,10 @@ The following diagram illustrates the relationships between TestUser, TestUserMa
         ┌────────────────┼────────────────┐
         │                │                │
 ┌───────▼──────┐  ┌──────▼──────┐  ┌─────▼─────────┐
-│ libs/api/    │  │ libs/eab/    │  │libs/web-portal│
+│ libs/api/    │  │ libs/sab/    │  │libs/web-portal│
 │              │  │              │  │               │
-│  type-api    │  │  type-eab    │  │  type-web-    │
-│  util-api    │  │  util-eab    │  │  portal       │
+│  type-api    │  │  type-sab    │  │  type-web-    │
+│  util-api    │  │  util-sab    │  │  portal       │
 └───────┬──────┘  └──────┬───────┘  └──────┬────────┘
         │                │                 │
         └────────────────┼─────────────────┘
@@ -929,21 +1413,21 @@ The following diagram illustrates the relationships between TestUser, TestUserMa
 └─────────────────────────────────────────────────────────┘
 ```
 
-### EAB Test Sharding Flow
+### SAB Test Sharding Flow
 
-EAB tests use Playwright's **shard feature** to distribute tests across multiple machines, with each machine running a single worker. This approach is necessary because EAB (Enterprise Access Browser) cannot run multiple instances on the same machine simultaneously.
+SAB tests use Playwright's **shard feature** to distribute tests across multiple machines, with each machine running a single worker. This approach is necessary because SAB (Secure Access Browser) cannot run multiple instances on the same machine simultaneously.
 
 **Key Characteristics:**
 - **Sharding**: Tests are distributed across multiple machines using Playwright's `--shard=X/Y` flag
-- **Single Worker Per Machine**: Each machine runs with `workers: 1` to avoid EAB instance conflicts
-- **Machine-Level Isolation**: Each machine has its own EAB instance, Unity Tray, and test accounts
+- **Single Worker Per Machine**: Each machine runs with `workers: 1` to avoid SAB instance conflicts
+- **Machine-Level Isolation**: Each machine has its own SAB instance, Unity Tray, and test accounts
 - **Parallel Execution**: Multiple machines execute their assigned shards in parallel
 
 #### Test Distribution Strategy
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│            EAB Test Sharding Architecture                │
+│            SAB Test Sharding Architecture                │
 ├─────────────────────────────────────────────────────────┤
 │                                                          │
 │  ┌────────────────────────────────────┐                │
@@ -976,7 +1460,7 @@ EAB tests use Playwright's **shard feature** to distribute tests across multiple
 │  │ Worker: 1    │ │ Worker: 1    │ │ Worker: 1    │    │
 │  │              │ │              │ │              │    │
 │  │ ┌──────────┐ │ │ ┌──────────┐ │ │ ┌──────────┐ │    │
-│  │ │ EAB Inst│ │ │ │ EAB Inst│ │ │ │ EAB Inst│ │    │
+│  │ │ SAB Inst│ │ │ │ SAB Inst│ │ │ │ SAB Inst│ │    │
 │  │ │ Unity   │ │ │ │ Unity   │ │ │ │ Unity   │ │    │
 │  │ │ Platform│ │ │ │ Platform│ │ │ │ Platform│ │    │
 │  │ │ Driver  │ │ │ │ Driver  │ │ │ │ Driver  │ │    │
@@ -993,26 +1477,26 @@ EAB tests use Playwright's **shard feature** to distribute tests across multiple
 │       │                          │                        │
 │       │  Each Machine Has:       │                        │
 │       │  - 1 Worker (required)    │                        │
-│       │  - 1 EAB Instance         │                        │
+│       │  - 1 SAB Instance         │                        │
 │       │  - 1 Unity Tray Process   │                        │
 │       │  - 1 PlatformDriver       │                        │
-│       │  - 1 MammothBrowserDriver │                        │
+│       │  - 1 CorporateBrowserDriver │                        │
 │       │  - Test Accounts          │                        │
 │       │    (hostname-filtered)    │                        │
 │       └─────────────────────────┘                        │
 │                                                          │
 │  Note: Multiple workers on same machine is not          │
-│        supported due to EAB instance limitations        │
+│        supported due to SAB instance limitations        │
 │                                                          │
 └─────────────────────────────────────────────────────────┘
 ```
 
 #### Test Project Configuration
 
-EAB tests use a single Playwright project with pattern-based test matching:
+SAB tests use a single Playwright project with pattern-based test matching:
 
 ```typescript
-// apps/eab/playwright.config.ts
+// apps/sab/playwright.config.ts
 projects: [
   {
     name: 'e2e',
@@ -1028,7 +1512,7 @@ projects: [
 #### Sharding Mechanism
 
 **1. Test Discovery**
-- Playwright scans `apps/eab/tests/` directory
+- Playwright scans `apps/sab/tests/` directory
 - Matches files ending with `.spec.ts`
 - Collects all test files for shard distribution
 
@@ -1040,12 +1524,12 @@ projects: [
 
 **3. Single Worker Per Machine**
 - Each machine runs with `workers: 1` (configured in base config)
-- This is required because EAB cannot run multiple instances on the same machine
+- This is required because SAB cannot run multiple instances on the same machine
 - Tests within a shard run sequentially within the single worker
 
 **4. Parallel Execution Across Machines**
 - Multiple machines execute their assigned shards in parallel
-- Each machine maintains isolated resources (EAB instance, Unity Tray, accounts)
+- Each machine maintains isolated resources (SAB instance, Unity Tray, accounts)
 - No resource sharing between machines
 
 #### Execution Configuration
@@ -1056,7 +1540,7 @@ projects: [
 │         Worker 1                    │
 │                                     │
 │  ┌─────────────────────────────┐   │
-│  │  EAB Instance (Shared)      │   │
+│  │  SAB Instance (Shared)      │   │
 │  │  Unity Tray Process         │   │
 │  │  PlatformDriver             │   │
 │  └─────────────────────────────┘   │
@@ -1069,7 +1553,7 @@ projects: [
 │  5. Test E (quit)                   │
 │                                     │
 │  Resource Sharing:                  │
-│  - EAB persists across tests        │
+│  - SAB persists across tests        │
 │  - Unity Tray persists              │
 │  - Faster execution (no startup)    │
 └─────────────────────────────────────┘
@@ -1087,7 +1571,7 @@ projects: [
 │  │              │  │              │  │              │  │
 │  │ Worker: 1    │  │ Worker: 1    │  │ Worker: 1    │  │
 │  │              │  │              │  │              │  │
-│  │ EAB Inst 1  │  │ EAB Inst 2   │  │ EAB Inst 3   │  │
+│  │ SAB Inst 1  │  │ SAB Inst 2   │  │ SAB Inst 3   │  │
 │  │ Unity 1     │  │ Unity 2      │  │ Unity 3      │  │
 │  │              │  │              │  │              │  │
 │  │ Test A       │  │ Test D       │  │ Test G       │  │
@@ -1096,7 +1580,7 @@ projects: [
 │  └──────────────┘  └──────────────┘  └──────────────┘  │
 │                                                          │
 │  Resource Isolation:                                     │
-│  - Each machine has separate EAB instance               │
+│  - Each machine has separate SAB instance               │
 │  - Each machine has separate Unity Tray                 │
 │  - Each machine has separate test accounts               │
 │    (filtered by machine hostname)                       │
@@ -1116,7 +1600,7 @@ projects: [
 
 #### Persistent Session Mode and Sharding
 
-EAB supports persistent session mode, where EAB instance is shared across tests within the single worker on each machine:
+SAB supports persistent session mode, where SAB instance is shared across tests within the single worker on each machine:
 
 **Persistent Mode (Standard Single Worker Configuration):**
 ```
@@ -1125,30 +1609,30 @@ EAB supports persistent session mode, where EAB instance is shared across tests 
 │                                     │
 │  ┌─────────────────────────────┐   │
 │  │  beforeAll:                 │   │
-│  │  - Launch EAB once          │   │
+│  │  - Launch SAB once          │   │
 │  │  - Initialize Unity Tray    │   │
 │  └─────────────────────────────┘   │
 │                                     │
 │  Test Execution:                    │
 │  ┌───────────────────────────┐   │
-│  │  Test A: Use existing EAB   │   │
+│  │  Test A: Use existing SAB   │   │
 │  └───────────────────────────┘   │
 │  ┌───────────────────────────┐   │
-│  │  Test B: Use existing EAB  │   │
+│  │  Test B: Use existing SAB  │   │
 │  └───────────────────────────┘   │
 │  ┌───────────────────────────┐   │
-│  │  Test C: Use existing EAB  │   │
+│  │  Test C: Use existing SAB  │   │
 │  └───────────────────────────┘   │
 │                                     │
 │  ┌─────────────────────────────┐   │
 │  │  afterAll:                  │   │
-│  │  - Cleanup EAB              │   │
+│  │  - Cleanup SAB              │   │
 │  │  - Terminate Unity Tray     │   │
 │  └─────────────────────────────┘   │
 │                                     │
 │  Benefits:                          │
 │  - Faster execution (no per-test    │
-│    EAB startup)                     │
+│    SAB startup)                     │
 │  - Reduced resource usage           │
 │  - Shared state across tests        │
 └─────────────────────────────────────┘
@@ -1166,21 +1650,21 @@ EAB supports persistent session mode, where EAB instance is shared across tests 
 │  │              │         │              │             │
 │  │ Worker: 1    │         │ Worker: 1     │             │
 │  │              │         │              │             │
-│  │ EAB Inst 1   │         │ EAB Inst 2    │             │
+│  │ SAB Inst 1   │         │ SAB Inst 2    │             │
 │  │ (Persistent) │         │ (Persistent)  │             │
 │  │              │         │              │             │
 │  │ Tests A,B,C  │         │ Tests D,E,F   │             │
-│  │ Share EAB 1  │         │ Share EAB 2   │             │
+│  │ Share SAB 1  │         │ Share SAB 2   │             │
 │  └──────────────┘         └──────────────┘             │
 │                                                          │
 │  Behavior:                                               │
-│  - Each machine maintains its own persistent EAB        │
-│  - Tests within a machine (shard) share EAB instance    │
-│  - Tests across machines use different EAB instances    │
+│  - Each machine maintains its own persistent SAB        │
+│  - Tests within a machine (shard) share SAB instance    │
+│  - Tests across machines use different SAB instances    │
 │  - Parallel execution with machine-level isolation       │
 │                                                          │
 │  Benefits:                                               │
-│  - Faster execution (no per-test EAB startup)           │
+│  - Faster execution (no per-test SAB startup)           │
 │  - Reduced resource usage per machine                    │
 │  - Scales horizontally with more machines               │
 └─────────────────────────────────────────────────────────┘
@@ -1188,12 +1672,12 @@ EAB supports persistent session mode, where EAB instance is shared across tests 
 
 #### Test Account Management Across Machines
 
-Test accounts are managed using **hostname-based filtering**, which is **machine-level**. Since EAB tests use sharding with one worker per machine, each machine has a single worker that uses the machine's hostname for account filtering.
+Test accounts are managed using **hostname-based filtering**, which is **machine-level**. Since SAB tests use sharding with one worker per machine, each machine has a single worker that uses the machine's hostname for account filtering.
 
 **Important Concepts:**
 - **Hostname**: Extracted from the machine's OS hostname (e.g., VM-01, VM-02)
 - **Shard**: A subset of tests assigned to a specific machine
-- **Worker**: Single worker per machine (workers: 1 is required for EAB)
+- **Worker**: Single worker per machine (workers: 1 is required for SAB)
 - **Account Filter**: Based on machine hostname, extracted as last 2 digits (e.g., "%01%" for VM-01)
 
 ```
@@ -1252,11 +1736,11 @@ Test accounts are managed using **hostname-based filtering**, which is **machine
    │
    ├─> Load playwright.config.ts
    │    ├─> Load base config
-   │    ├─> Load EAB-specific config
-   │    └─> Configure workers: 1 (fixed for EAB)
+   │    ├─> Load SAB-specific config
+   │    └─> Configure workers: 1 (fixed for SAB)
    │
    ├─> Test Discovery
-   │    ├─> Scan apps/eab/tests/ directory
+   │    ├─> Scan apps/sab/tests/ directory
    │    ├─> Match files: /.*spec.ts/
    │    └─> Collect all test files
    │
@@ -1272,16 +1756,16 @@ Test accounts are managed using **hostname-based filtering**, which is **machine
    │    │    ├─> Verify Appium installation
    │    │    └─> Prepare test environment
    │    │
-   │    └─> EAB Instance Setup (If Persistent Mode)
-   │         ├─> Launch EAB with --remote-debugging-port
+   │    └─> SAB Instance Setup (If Persistent Mode)
+   │         ├─> Launch SAB with --remote-debugging-port
    │         ├─> Initialize PlatformDriver
-   │         └─> Initialize MammothBrowserDriver
+   │         └─> Initialize CorporateBrowserDriver
    │
    ├─> Test Execution (Within Single Worker)
    │    │
    │    ├─> For each test in shard's queue:
    │    │    ├─> Test Setup (beforeEach/beforeAll)
-   │    │    │    └─> Initialize EAB (if not persistent)
+   │    │    │    └─> Initialize SAB (if not persistent)
    │    │    │
    │    │    ├─> Test Run
    │    │    │    ├─> Create TestUser
@@ -1289,7 +1773,7 @@ Test accounts are managed using **hostname-based filtering**, which is **machine
    │    │    │    │    ├─> Build filter: %{hostnameDigits}%
    │    │    │    │    ├─> Acquire account: Query DB with hostname filter
    │    │    │    │    └─> Lock account in database
-   │    │    │    ├─> Use Unity/MammothBrowser Assistant
+   │    │    │    ├─> Use Unity/CorporateBrowser Assistant
    │    │    │    ├─> Execute test steps
    │    │    │    └─> Verify results
    │    │    │
@@ -1298,12 +1782,12 @@ Test accounts are managed using **hostname-based filtering**, which is **machine
    │    │         └─> Unlock test accounts
    │    │
    │    └─> Worker Completion
-   │         ├─> Cleanup EAB instance (if persistent)
+   │         ├─> Cleanup SAB instance (if persistent)
    │         ├─> Unlock test accounts
    │         └─> Report results
    │
    └─> Global Teardown (Per Machine)
-        ├─> Terminate EAB instance
+        ├─> Terminate SAB instance
         ├─> Cleanup Unity Tray process
         └─> Release machine resources
 ```
@@ -1317,23 +1801,23 @@ Test accounts are managed using **hostname-based filtering**, which is **machine
 #### Basic TestUser Creation
 
 ```typescript
-import { testFixturesAPI as test } from '@company-qa/shared/util-playwright';
-import { TestUserGenerator } from '@company-qa/shared/feature-aaa';
+import { testFixturesAPI as test } from '@framework/shared/util-playwright';
+import { TestUserGenerator, TestUserManager } from '@framework/shared/feature-aaa';
 
 test.describe('Example Test Suite', () => {
   test('Create and use test users', async ({ adminUser }) => {
     // Admin user is provided via fixture
-    const adminUserAPITA = adminUser.useAPIAssistant<
-      UserApiManager,
+    const adminUserAPITA = await adminUser.useAPIAssistant<
+      UserAPI,
       TAUserAPI
-    >(UserApiManager);
+    >(UserAPI);
 
     // Create a random user using generator
     const randomUser = await TestUserGenerator.createRandomUser({
       subDomainName: 'main',
     });
 
-    // Register user in Cognito
+    // Register user in authentication system
     await randomUser.cognitoSignUp();
 
     // Use TestUserManager to track users
@@ -1351,20 +1835,22 @@ test.describe('Example Test Suite', () => {
 #### TestUser with Notes (Resource Tracking)
 
 ```typescript
+import { NoteKey } from '@framework/shared/type-aaa';
+
 test('Track created resources', async ({ adminUser }) => {
   const adminAPITA = await adminUser.useAPIAssistant<
-    LoginPolicyApiManager,
+    LoginPolicyAPI,
     TALoginPolicyAPI
-  >(LoginPolicyApiManager);
+  >(LoginPolicyAPI);
 
   // Arrange: Create input payload
   const createInput = await adminAPITA.arrange.getCreateInputPayload();
 
   // Actions: Create resource
+  // The created ID is automatically stored in TestUser notes during creation
   const actualResult = await adminAPITA.actions.createLoginPolicy(createInput);
 
-  // The created ID is automatically stored in TestUser notes
-  // Access via: adminUser.getNote(NoteKey.LoginPolicyIds)
+  // Access tracked resource IDs via: adminUser.getNote(NoteKey.LoginPolicyIds)
 
   // Assert: Verify creation
   const expectedResult = await adminAPITA.arrange.getExpectedResultForCreatePolicyOK(
@@ -1379,13 +1865,16 @@ test('Track created resources', async ({ adminUser }) => {
 #### Complete CRUD Example
 
 ```typescript
+import { LoginPolicyAPI } from '@framework/api/util-api';
+import type { TALoginPolicyAPI } from '@framework/shared/feature-aaa';
+
 test.describe('LoginPolicy API Tests', () => {
   test('Create LoginPolicy @C1234 sanity', async ({ adminUser }) => {
     // Arrange
     const adminAPITA = await adminUser.useAPIAssistant<
-      LoginPolicyApiManager,
+      LoginPolicyAPI,
       TALoginPolicyAPI
-    >(LoginPolicyApiManager);
+    >(LoginPolicyAPI);
 
     const createInput = await adminAPITA.arrange.getCreateInputPayload({
       isDenyAction: false,
@@ -1404,9 +1893,9 @@ test.describe('LoginPolicy API Tests', () => {
   test('Update LoginPolicy @C1235 sanity', async ({ adminUser }) => {
     // Arrange
     const adminAPITA = await adminUser.useAPIAssistant<
-      LoginPolicyApiManager,
+      LoginPolicyAPI,
       TALoginPolicyAPI
-    >(LoginPolicyApiManager);
+    >(LoginPolicyAPI);
 
     // Preset: Create a policy first
     const presetPolicy = await adminAPITA.arrange.generatePresetLoginPolicyEntry(
@@ -1431,9 +1920,9 @@ test.describe('LoginPolicy API Tests', () => {
   test('Delete LoginPolicy @C1236 sanity', async ({ adminUser }) => {
     // Arrange
     const adminAPITA = await adminUser.useAPIAssistant<
-      LoginPolicyApiManager,
+      LoginPolicyAPI,
       TALoginPolicyAPI
-    >(LoginPolicyApiManager);
+    >(LoginPolicyAPI);
 
     const presetPolicy = await adminAPITA.arrange.generatePresetLoginPolicyEntry(
       adminAPITA.actions
@@ -1611,13 +2100,13 @@ module.exports = defineConfig({
 });
 ```
 
-### EAB Testing Examples
+### SAB Testing Examples
 
-#### Basic EAB Test with Unity Assistant
+#### Basic SAB Test with Unity Assistant
 
 ```typescript
-import { testFixturesEAB as test } from '@company-qa/shared/util-playwright';
-import { UnityTrayPage } from '@company-qa/shared/feature-aaa';
+import { testFixturesSAB as test } from '@framework/shared/util-playwright';
+import { UnityTrayPage } from '@framework/shared/feature-aaa';
 
 test.describe('Unity Tray Tests', () => {
   test('Login via Unity Tray @C2001 sanity', async ({ adminUser }) => {
@@ -1637,39 +2126,39 @@ test.describe('Unity Tray Tests', () => {
 });
 ```
 
-#### EAB Test with Mammoth Browser Assistant
+#### SAB Test with Corporate Browser Assistant
 
 ```typescript
-import { testFixturesEAB as test } from '@company-qa/shared/util-playwright';
-import { MBAppLauncherPage } from '@company-qa/shared/feature-aaa';
+import { testFixturesSAB as test } from '@framework/shared/util-playwright';
+import { CorporateAppLauncherPage } from '@framework/shared/feature-aaa';
 
-test.describe('Mammoth Browser Tests', () => {
+test.describe('Corporate Browser Tests', () => {
   test('Launch SaaS Application @C2002 sanity', async ({ adminUser }) => {
-    // Arrange: Get Mammoth Browser Assistant
-    const mbTA = await adminUser.useMammothBrowserAssistant<
-      MBAppLauncherPage,
-      TAMBAppLauncherPage
-    >(MBAppLauncherPage);
+    // Arrange: Get Corporate Browser Assistant
+    const cbTA = await adminUser.useCorporateBrowserAssistant<
+      CorporateAppLauncherPage,
+      TACorporateAppLauncherPage
+    >(CorporateAppLauncherPage);
 
     // Actions: Launch application
-    await mbTA.actions.launchSaaSApp('example-app');
+    await cbTA.actions.launchSaaSApp('example-app');
 
     // Assert: Verify application launched
-    await mbTA.assert.appLaunchedOK('example-app');
+    await cbTA.assert.appLaunchedOK('example-app');
   });
 });
 ```
 
-#### EAB Test with Persistent Session Mode
+#### SAB Test with Persistent Session Mode
 
 ```typescript
-import { testFixturesEAB as test } from '@company-qa/shared/util-playwright';
-import { createHooksManager } from '@company-qa/shared/feature-aaa';
+import { testFixturesSAB as test } from '@framework/shared/util-playwright';
+import { createHooksManager } from '@framework/shared/feature-aaa';
 
-test.describe('EAB Persistent Session Tests', () => {
+test.describe('SAB Persistent Session Tests', () => {
   // Configure persistent mode for all tests in this describe block
   test.use({
-    eabSessionMode: {
+    sabSessionMode: {
       mode: 'persistent',
     },
   });
@@ -1686,54 +2175,54 @@ test.describe('EAB Persistent Session Tests', () => {
     
     globalUser = await TestUserGenerator.createAdminUser();
 
-    // Setup persistent EAB session
+    // Setup persistent SAB session
     hooksManager
       .initialize()
       .configure({
-        eabSessionMode: 'persistent',
+        sabSessionMode: 'persistent',
         enableLogging: true,
       })
       .beforeAll()
-      .setupEabSession()
+      .setupSabSession()
       .afterAll()
-      .cleanupEabAndTestEntities();
+      .cleanupSabAndTestEntities();
   });
 
-  test('First test using persistent EAB @C2003 sanity', async ({ }) => {
-    const mbTA = await globalUser.useMammothBrowserAssistant<
-      MBAppLauncherPage,
-      TAMBAppLauncherPage
-    >(MBAppLauncherPage);
+  test('First test using persistent SAB @C2003 sanity', async ({ }) => {
+    const cbTA = await globalUser.useCorporateBrowserAssistant<
+      CorporateAppLauncherPage,
+      TACorporateAppLauncherPage
+    >(CorporateAppLauncherPage);
 
-    // EAB instance is already running from beforeAll
-    await mbTA.actions.navigateToUrl('https://example.com');
-    await mbTA.assert.pageLoadedOK();
+    // SAB instance is already running from beforeAll
+    await cbTA.actions.navigateToUrl('https://example.com');
+    await cbTA.assert.pageLoadedOK();
   });
 
-  test('Second test reusing same EAB @C2004 sanity', async ({ }) => {
-    // This test reuses the same EAB instance from previous test
-    const mbTA = await globalUser.useMammothBrowserAssistant<
-      MBAppLauncherPage,
-      TAMBAppLauncherPage
-    >(MBAppLauncherPage);
+  test('Second test reusing same SAB @C2004 sanity', async ({ }) => {
+    // This test reuses the same SAB instance from previous test
+    const cbTA = await globalUser.useCorporateBrowserAssistant<
+      CorporateAppLauncherPage,
+      TACorporateAppLauncherPage
+    >(CorporateAppLauncherPage);
 
-    // Faster execution - no EAB startup overhead
-    await mbTA.actions.navigateToUrl('https://another-site.com');
-    await mbTA.assert.pageLoadedOK();
+    // Faster execution - no SAB startup overhead
+    await cbTA.actions.navigateToUrl('https://another-site.com');
+    await cbTA.assert.pageLoadedOK();
   });
 
   test.afterAll(async () => {
-    // Cleanup persistent EAB instance
+    // Cleanup persistent SAB instance
     await hooksManager.executeAfterAll();
   });
 });
 ```
 
-#### EAB Test with Content Scanning
+#### SAB Test with Content Scanning
 
 ```typescript
 import { ContentScanningTestManager } from './content-scanning-test-manager';
-import { testFixturesEAB as test } from '@company-qa/shared/util-playwright';
+import { testFixturesSAB as test } from '@framework/shared/util-playwright';
 
 test.describe('Content Scanning Tests', () => {
   const contentScanningTestManager = new ContentScanningTestManager();
@@ -1744,7 +2233,7 @@ test.describe('Content Scanning Tests', () => {
       .processNode()
       .facade()
       .getter()
-      .getEabConfigHandler()
+      .getSabConfigHandler()
       .getContentScanningTestConfig();
 
     return contentScanningTestManager.getSensitiveTestDataWithOptions(config);
@@ -1755,10 +2244,10 @@ test.describe('Content Scanning Tests', () => {
   testData.forEach(({ type, values, priority }) => {
     test(`Test ${type} detection - ${priority} priority`, async ({ adminUser }) => {
       // Arrange
-      const mbTA = await adminUser.useMammothBrowserAssistant<
-        MBAppLauncherPage,
-        TAMBAppLauncherPage
-      >(MBAppLauncherPage);
+      const cbTA = await adminUser.useCorporateBrowserAssistant<
+        CorporateAppLauncherPage,
+        TACorporateAppLauncherPage
+      >(CorporateAppLauncherPage);
 
       const qaWebServerTA = await contentScanningTestManager.setupQAWebServerPage(
         adminUser,
@@ -1800,7 +2289,7 @@ test.describe('Content Scanning Tests', () => {
    ├─> Uses Playwright fixtures (adminUser, pendingRandomUser, etc.)
    │
    ├─> Test script imports AAA assistant
-   │    import { UserApiManager } from '@company-qa/shared/feature-aaa';
+   │    import { UserAPI } from '@framework/api/util-api';
    │
    ├─> Test execution begins
    │    │
@@ -1906,7 +2395,7 @@ Configuration Hierarchy (bottom to top priority):
 3. App Environment Config (apps/{app}/config/.env.{env})
    - App-specific environment variables
    - API endpoints
-   - Credentials (via SHARED_PASSWORD)
+   - Credentials (via environment variables)
    │
    └─> Loaded by: loadEnvConfig() in app's playwright.config.ts
 
@@ -1919,9 +2408,9 @@ Configuration Hierarchy (bottom to top priority):
 
 5. Command Line Environment Variables
    - NODE_ENV={env}
-   - SHARED_PASSWORD={password}
-   - RP_API_KEY={key}
-   - RP_MODE={mode}
+   - Test credentials (via environment variables)
+   - API keys (via environment variables)
+   - Reporting mode configuration
    │
    └─> Highest priority, overrides all above
 
@@ -1994,40 +2483,40 @@ Test Execution
         └─> Accessible via web UI or API
 ```
 
-### EAB Test Execution Flow
+### SAB Test Execution Flow
 
 ```
 1. Test Command Execution
    │
-   ├─> Nx command: npx nx run eab:test@default
+   ├─> Nx command: npx nx run sab:test@default
    │    └─> Executes: npx playwright test --reporter=html --project=e2e
    │
    ├─> Playwright Initialization
    │    ├─> Load playwright.config.ts
    │    │    ├─> Load base config
-   │    │    ├─> Fetch EAB build info from GitHub
+   │    │    ├─> Fetch SAB build info from GitHub
    │    │    ├─> Configure Report Portal attributes
    │    │    └─> Setup web server for testing
    │    │
    │    └─> Global Setup
    │         ├─> Install platform packages (Appium drivers)
    │         ├─> Verify Appium server
-   │         └─> Prepare EAB build (if globalSetup enabled)
+   │         └─> Prepare SAB build (if globalSetup enabled)
    │
    ├─> Test Discovery and Sharding
-   │    ├─> Scan apps/eab/tests/ directory
+   │    ├─> Scan apps/sab/tests/ directory
    │    ├─> Match files: /.*spec.ts/
    │    ├─> Collect test files
    │    └─> Distribute tests across shards (if --shard specified)
    │
    ├─> Worker Initialization (Single Worker Per Machine)
-   │    └─> EAB Environment Setup (If Persistent Mode)
-   │         ├─> Launch EAB with --remote-debugging-port=9222
+   │    └─> SAB Environment Setup (If Persistent Mode)
+   │         ├─> Launch SAB with --remote-debugging-port=9222
    │         ├─> Initialize PlatformDriver
    │         │    ├─> Windows: Connect to WinAppDriver
    │         │    └─> macOS: Connect to Appium Mac2 Driver
-   │         └─> Initialize MammothBrowserDriver
-   │              └─> Connect via CDP to EAB instance
+   │         └─> Initialize CorporateBrowserDriver
+   │              └─> Connect via CDP to SAB instance
    │
    ├─> Test Execution (Within Single Worker)
    │    │
@@ -2040,14 +2529,14 @@ Test Execution
    │    │    │    │    ├─> Acquire account: Query DB WHERE lock_flag = 0 AND username LIKE filter
    │    │    │    │    └─> Lock account: UPDATE ... SET lock_flag = 1
    │    │    │    ├─> Register user in TestUserManager
-   │    │    │    └─> Initialize EAB (if not persistent mode)
+   │    │    │    └─> Initialize SAB (if not persistent mode)
    │    │    │
    │    │    ├─> Test Run
    │    │    │    ├─> Get Unity Assistant (testUser.useUnityAssistant())
    │    │    │    │    └─> PlatformDriver controls Unity Tray
    │    │    │    │
-   │    │    │    ├─> Get MammothBrowser Assistant (testUser.useMammothBrowserAssistant())
-   │    │    │    │    └─> MammothBrowserDriver controls browser via CDP
+   │    │    │    ├─> Get CorporateBrowser Assistant (testUser.useCorporateBrowserAssistant())
+   │    │    │    │    └─> CorporateBrowserDriver controls browser via CDP
    │    │    │    │
    │    │    │    ├─> Execute test steps
    │    │    │    │    ├─> Unity Tray operations (open, navigate, close)
@@ -2061,13 +2550,13 @@ Test Execution
    │    │         └─> Store test results
    │    │
    │    └─> Worker Completion
-   │         ├─> Cleanup persistent EAB instance (if applicable)
+   │         ├─> Cleanup persistent SAB instance (if applicable)
    │         ├─> Unlock test accounts
    │         ├─> Terminate PlatformDriver connection
    │         └─> Report results to Playwright
    │
    ├─> Global Teardown (Per Machine)
-   │    ├─> Terminate EAB instance
+   │    ├─> Terminate SAB instance
    │    ├─> Cleanup Unity Tray process
    │    └─> Release Appium connection
    │
@@ -2083,11 +2572,11 @@ Test Execution
 
 **Key Differences from API/Web Portal Tests:**
 
-1. **Platform Drivers**: EAB tests require platform-specific drivers (WinAppDriver/Appium Mac2)
-2. **CDP Connection**: MammothBrowserDriver connects via Chrome DevTools Protocol
+1. **Platform Drivers**: SAB tests require platform-specific drivers (WinAppDriver/Appium Mac2)
+2. **CDP Connection**: CorporateBrowserDriver connects via Chrome DevTools Protocol
 3. **Native Application**: Tests interact with desktop application, not just browser
-4. **Resource Isolation**: Each worker maintains separate EAB and Unity Tray instances
-5. **Persistent Mode**: Optional mode to share EAB instance across tests within a worker
+4. **Resource Isolation**: Each worker maintains separate SAB and Unity Tray instances
+5. **Persistent Mode**: Optional mode to share SAB instance across tests within a worker
 6. **Hostname-Based Account Assignment**: Test accounts assigned based on worker hostname
 
 ---
@@ -2107,14 +2596,14 @@ The framework supports multiple Jenkins pipelines for different testing scenario
 - **Post Actions**: Archive reports, publish HTML, send notifications
 
 #### Platform-Specific Pipelines
-- **Jenkinsfile.macos**: macOS-specific EAB tests
+- **Jenkinsfile.macos**: macOS-specific SAB tests
   - Runs on `macbook-slave` agent
   - Executes API and E2E tests on macOS
   - Uses `--headed` flag for E2E tests
-- **Jenkinsfile.windows**: Windows-specific EAB tests
+- **Jenkinsfile.windows**: Windows-specific SAB tests
   - Runs on `windows-slave` agent
-  - Executes Unity/Mammoth Browser tests on Windows
-  - Filters tests with `-g "Mammoth Browser"` pattern
+  - Executes Unity/Corporate Browser tests on Windows
+  - Filters tests with `-g "Corporate Browser"` pattern
 - **Jenkinsfile.idp**: Identity Provider tests
 - **Jenkinsfile.auto**: Automated test execution
 
@@ -2185,13 +2674,13 @@ pipeline {
 
 ### Key Documentation Files
 
-- **Main README**: `/automation-test/README.md` - Comprehensive project overview
-- **Apps Documentation**: `/automation-test/apps/README.md` - App organization guide
-- **Libraries Documentation**: `/automation-test/libs/README.md` - Library structure
-- **API Testing Guide**: `/automation-test/apps/api/README.md` - API testing specifics
-- **Web Portal Guide**: `/automation-test/apps/web-portal/README.md` - UI testing guide
-- **EAB Guide**: `/automation-test/apps/eab/README.md` - EAB testing guide
-- **Structure Guidelines**: `/automation-test/docs/structure_guideline.md` - Code organization rules
+- **Main README**: `/automation-framework/README.md` - Comprehensive project overview
+- **Apps Documentation**: `/automation-framework/apps/README.md` - App organization guide
+- **Libraries Documentation**: `/automation-framework/libs/README.md` - Library structure
+- **API Testing Guide**: `/automation-framework/apps/api/README.md` - API testing specifics
+- **Web Portal Guide**: `/automation-framework/apps/web-portal/README.md` - UI testing guide
+- **SAB Guide**: `/automation-framework/apps/sab/README.md` - SAB testing guide
+- **Structure Guidelines**: `/automation-framework/docs/structure_guideline.md` - Code organization rules
 
 ### Key Diagrams and Resources
 
@@ -2218,5 +2707,5 @@ This automation test framework demonstrates a sophisticated approach to test aut
 4. **Scalability**: Support for parallel execution, dynamic user management, and flexible configuration
 5. **Maintainability**: Clear separation of concerns, domain-driven organization, and comprehensive documentation
 
-The framework successfully integrates API, UI, EAB, and Performance testing into a cohesive, maintainable, and scalable testing infrastructure.
+The framework successfully integrates API, UI, SAB, and Performance testing into a cohesive, maintainable, and scalable testing infrastructure.
 
