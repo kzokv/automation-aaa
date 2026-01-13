@@ -3,7 +3,14 @@
 ## Unified Automation AAA Training Materials (Audio, Video, Slides)
 
 - 🎙️ **Audio Presentation**: [Listen here](docs/resources/%5BAudio%5DThe_Unified_Automation_AAA_02.mp4)
+
+
+https://github.com/user-attachments/assets/332f707b-b06a-4754-8437-7ac9a100bf2d
+
 - 📽️ **Video presentation**: [Watch here](docs/resources/%5BVideo%5DThe_Unified_Automation_AAA_02.mp4)
+
+https://github.com/user-attachments/assets/fe3d455c-7648-491a-a2b7-27409a1608e6
+
 - 📊 **Slides**: [Download PDF](docs/resources/%5BSlides%5DThe_Unified_Automation_AAA_02.pdf)
 
 Welcome to the **Unified Automation Framework** documentation ("Automation AAA"). This repository serves as the architectural blueprint and documentation hub for our testing ecosystem.
