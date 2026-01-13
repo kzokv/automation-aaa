@@ -537,4 +537,4 @@ await utilManager.waitUntil().conditionMet<boolean>(
 
 - [Configuration Management](./configuration.md) - Environment loading and overrides
 - [Infrastructure & Sharding](./infrastructure.md) - Parallel execution architecture
-- [AAA Pattern](./aaa-pattern.md) - TestUser integration with utilManager
+- [Test Assistants](./test-assistants.md) - TestUser integration with utilManager

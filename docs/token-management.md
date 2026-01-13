@@ -575,7 +575,7 @@ utilManager.logger().debug.log(
 
 ## Related Documentation
 
-- [AAA Pattern](./aaa-pattern.md) - TestUser authentication integration
+- [Test Assistants](./test-assistants.md) - TestUser authentication integration
 - [API Testing](./api-testing.md) - HTTP client usage with token providers
 - [Configuration](./configuration.md) - Cognito configuration management
 - [Test User Management](./test-user-management.md) - User lifecycle and credentials

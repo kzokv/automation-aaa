@@ -589,7 +589,7 @@ utilManager.logger().debug.log(
 
 ## Related Documentation
 
-- [AAA Pattern](./aaa-pattern.md) - TestUser and assistant patterns
+- [Test Assistants](./test-assistants.md) - TestUser and assistant patterns
 - [Token Management](./token-management.md) - Authentication and token refresh
 - [Fixtures](./fixtures.md) - User fixtures and lifecycle
 - [Global Setup](./global-setup.md) - Account pool initialization

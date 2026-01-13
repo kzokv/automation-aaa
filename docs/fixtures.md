@@ -689,5 +689,5 @@ sabFixtureManager: async ({ adminUser, sabSessionMode }, use, testInfo) => {
 
 - [Drivers](./drivers.md) - Platform driver and browser driver architecture
 - [SAB Testing](./sab-testing.md) - Comprehensive SAB testing guide
-- [AAA Pattern](./aaa-pattern.md) - TestUser and assistant patterns
+- [Test Assistants](./test-assistants.md) - TestUser and assistant patterns
 - [Infrastructure](./infrastructure.md) - CI/CD and parallel execution

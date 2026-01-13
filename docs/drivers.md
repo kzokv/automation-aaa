@@ -561,7 +561,7 @@ const assistant3 = await testUser.usePlatformDriverAssistant(PageClass);
 
 ## Related Documentation
 
-- [AAA Pattern](./aaa-pattern.md) - TestUser and assistant patterns
+- [Test Assistants](./test-assistants.md) - TestUser and assistant patterns
 - [Fixtures](./fixtures.md) - Driver lifecycle in isolated vs persistent modes
 - [SAB Testing](./sab-testing.md) - Comprehensive SAB testing guide
 - [Test Assistants](./test-assistants.md) - Assistant creation and usage

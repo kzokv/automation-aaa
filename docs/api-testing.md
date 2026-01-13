@@ -134,7 +134,7 @@ For detailed token management, see [Token Management](./token-management.md).
 ## Related Documentation
 
 - [Token Management](./token-management.md) - TestUserTokenProvider and retry logic
-- [AAA Pattern](./aaa-pattern.md) - TestUser and API assistant patterns
+- [Test Assistants](./test-assistants.md) - TestUser and API assistant patterns
 - [Configuration](./configuration.md) - API endpoint configuration
 - [Test Assistants](./test-assistants.md) - API assistant lifecycle
 

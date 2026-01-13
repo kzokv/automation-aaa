@@ -26,13 +26,12 @@ Our framework is designed to unify **API**, **Web**, and **Desktop** (Native) te
 
 ### 🏗️ Architecture & Core Concepts
 -   **[Architecture Overview](docs/architecture.md)**: Explore the Nx Monorepo structure, library organization, and dependency rules.
--   **[The AAA Pattern](docs/aaa-pattern.md)**: Learn about the `TestUser` controller, Page Object composition, and how we enforce clean test logic.
+-   **[Test Assistants & AAA Pattern](docs/test-assistants.md)**: The core of the framework. Learn about the `TestUser` controller, the AAA interaction model, Page Object composition, and assistant lifecycle.
 -   **[Framework Orchestration](docs/orchestration.md)**: Central `utilManager` facade, sharding coordination strategies, and utility categories.
 -   **[Configuration Management](docs/configuration.md)**: Environment loading, Playwright config overrides, and facade pattern for configuration access.
 
 ### 👤 Test User & Authentication
 -   **[Test User Management](docs/test-user-management.md)**: TestUser lifecycle, account pooling, and authentication management.
--   **[Test Assistants](docs/test-assistants.md)**: Four assistant types (API, Web Portal, Platform Driver, Corporate Browser), mappers, and lifecycle.
 -   **[Token Management](docs/token-management.md)**: TestUserTokenProvider, automatic token refresh, retry logic with exponential backoff.
 
 ### 🎭 Driver Architecture
